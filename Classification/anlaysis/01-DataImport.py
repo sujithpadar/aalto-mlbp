@@ -15,5 +15,3 @@ features = ['but','good','place','food','great','very','service','back','really'
 logreg = LogisticRegression()
 logreg.train(data,target,features)
 logreg.predict(newdata=data,type="class")
-asas
-
