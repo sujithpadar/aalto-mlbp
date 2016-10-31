@@ -29,7 +29,7 @@ class LogisticRegression:
         self.target = target
 
         self.x = self.data[features]
-        self.x['constant'] = 1      # add a constant vector
+        self.x['constant'] = 1    # add a constant vector
         self.features.insert(0, "constant")
         self.x = self.x[features]
 
@@ -101,4 +101,3 @@ class LogisticRegression:
             prediction = (prediction >= classthreshold) * 1
 
         return prediction
-asas
