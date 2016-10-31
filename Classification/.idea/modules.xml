@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/../AaltoMLBPClassification/.idea/AaltoMLBPClassification.iml" filepath="$PROJECT_DIR$/../AaltoMLBPClassification/.idea/AaltoMLBPClassification.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/Classification.iml" filepath="$PROJECT_DIR$/.idea/Classification.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../aalto-mlbp/.idea/aalto-mlbp.iml" filepath="$PROJECT_DIR$/../aalto-mlbp/.idea/aalto-mlbp.iml" />
     </modules>
   </component>
 </project>
