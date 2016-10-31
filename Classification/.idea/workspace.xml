@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e03f8b38-c79d-4910-876c-50d033a00bf0" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/project/LogisticRegression.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/project/__init__.py" afterPath="" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mlclassifiers/LogisticRegression.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mlclassifiers/__init__.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="Classification.iws" />
@@ -390,7 +390,14 @@
       <option name="project" value="LOCAL" />
       <updated>1477927911085</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="testing">
+      <created>1477927954445</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1477927954445</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="ToolWindowManager">
