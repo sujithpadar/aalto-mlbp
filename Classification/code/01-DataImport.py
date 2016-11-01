@@ -9,7 +9,7 @@ import random
 Import data and declare features
 '''
 rawdata = pd.read_csv("/media/Documents/01 Aalto/03 Study/Semester 01/02 Machine Learning Basic Principles - Alex Jung/Term Project/Classification/data/classification_dataset_training.csv")
-target = ["rating"]
+target = ['rating']
 features = ['but','good','place','food','great','very','service','back','really','nice',
             'love','little','ordered','first','much','came','went','try','staff','people',
             'restaurant','order','never','friendly','pretty','come','chicken','again','vegas',
@@ -28,12 +28,31 @@ testdf = rawdata.loc[set(range(0,rawdata.shape[0]))-set(trainvec),]
 '''
 model 1 - logistic regression
 '''
+# train model
 logreg = LogisticRegression()
 logreg.train(traindf,target,features)
 
+# prediction on train and test data
 traindf['pred1'] = logreg.predict(newdata=traindf,type="class")
 testdf['pred1'] = logreg.predict(newdata=testdf,type="class")
 
+# classification summary
 ConfusionMatrix(traindf['rating'],traindf['pred1'])
 ConfusionMatrix(testdf['rating'],testdf['pred1'])
+
+'''
+model 2 - logitic regression with L2 regularization
+'''
+# train model
+logreg = LogisticRegression(L2regular=True,lambreg=0.1)
+logreg.train(traindf,target,features)
+
+# prediction on train and test data
+traindf['pred2'] = logreg.predict(newdata=traindf,type="class")
+testdf['pred2'] = logreg.predict(newdata=testdf,type="class")
+
+# classification summary
+ConfusionMatrix(traindf['rating'],traindf['pred2'])
+ConfusionMatrix(testdf['rating'],testdf['pred2'])
+
 

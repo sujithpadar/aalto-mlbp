@@ -1,6 +1,12 @@
 import pandas as pd
 
 def ConfusionMatrix(actual,predicted):
+    '''
+
+    :param actual: actual labels
+    :param predicted: predicted labels
+    :return: count matrix and various accuracies
+    '''
     df = pd.DataFrame(data={'actual' : actual,'predicted' : predicted})
     countmatrix = df.groupby(['actual', 'predicted']).size()
 
