@@ -1,5 +1,5 @@
 
-from mlclassifiers import LogisticRegression,ConfusionMatrix
+from mlclassifiers import LogisticRegression,ConfusionMatrix,KfoldCV
 
 import pandas as pd
 import random
@@ -21,7 +21,7 @@ features = ['but','good','place','food','great','very','service','back','really'
 random.seed(1234)
 trainvec = random.sample(range(0,rawdata.shape[0]),round(rawdata.shape[0]*0.7))
 traindf = rawdata.loc[trainvec,]
-testdf = rawdata.loc[set(range(0,rawdata.shape[0]))-set(trainvec),]
+validationdf = rawdata.loc[set(range(0,rawdata.shape[0]))-set(trainvec),]
 
 
 
@@ -34,11 +34,14 @@ logreg.train(traindf,target,features)
 
 # prediction on train and test data
 traindf['pred1'] = logreg.predict(newdata=traindf,type="class")
-testdf['pred1'] = logreg.predict(newdata=testdf,type="class")
+validationdf['pred1'] = logreg.predict(newdata=validationdf,type="class")
 
 # classification summary
 ConfusionMatrix(traindf['rating'],traindf['pred1'])
-ConfusionMatrix(testdf['rating'],testdf['pred1'])
+ConfusionMatrix(validationdf['rating'],validationdf['pred1'])
+
+# crossvalidation summary
+KfoldCV(model = logreg,data = rawdata,target = target,features = features,k = 5)
 
 '''
 model 2 - logitic regression with L2 regularization
@@ -49,10 +52,12 @@ logreg.train(traindf,target,features)
 
 # prediction on train and test data
 traindf['pred2'] = logreg.predict(newdata=traindf,type="class")
-testdf['pred2'] = logreg.predict(newdata=testdf,type="class")
+validationdf['pred2'] = logreg.predict(newdata=validationdf,type="class")
 
 # classification summary
 ConfusionMatrix(traindf['rating'],traindf['pred2'])
-ConfusionMatrix(testdf['rating'],testdf['pred2'])
+ConfusionMatrix(validationdf['rating'],validationdf['pred2'])
 
+# crossvalidation summary
+KfoldCV(model = logreg,data = rawdata,target = target,features = features, k = 5)
 
