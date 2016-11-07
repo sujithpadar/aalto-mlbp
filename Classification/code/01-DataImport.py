@@ -1,6 +1,5 @@
 
 from mlclassifiers import LogisticRegression,ConfusionMatrix,KfoldCV
-
 import pandas as pd
 import random
 
@@ -60,4 +59,5 @@ ConfusionMatrix(validationdf['rating'],validationdf['pred2'])
 
 # crossvalidation summary
 KfoldCV(model = logreg,data = rawdata,target = target,features = features, k = 5)
+
 

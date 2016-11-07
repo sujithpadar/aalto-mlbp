@@ -19,7 +19,7 @@ class LogisticRegression:
         self.regularization = L2regular
         self.lamb = lambreg
 
-    def train(self,data,target,features):
+    def train(self,data,target,features = None):
         '''
         :param data: input pandas dataframe
         :param target: the target label
@@ -27,14 +27,14 @@ class LogisticRegression:
         :return: weights for each feature
         '''
 
-        self.data = data
-        self.features = features
-        self.target = target
+        self.data = data.copy()
+        self.features = features.copy()
+        self.target = target.copy()
 
-        self.x = self.data[features]
+        self.x = self.data[self.features]
         self.x['constant'] = 1    # add a constant vector
         self.features.insert(0, "constant")
-        self.x = self.x[features]
+        self.x = self.x[self.features]
 
         self.y = np.concatenate(self.data[target].values)
 
