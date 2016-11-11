@@ -132,12 +132,14 @@ class LogisticRegression:
         return self.weights
 
 
-    def predict(self,newdata,type="raw",classthreshold=0.5):
+    def predict(self,ndata,type="raw",classthreshold=0.5):
         '''
         :param newdata: new data for which the prediction is made
         :param type: return prediction type : raw & class
         :return:
         '''
+
+        newdata = ndata.copy()
 
         newdata['constant'] = 1     # add a constant vector
         newdata = newdata[self.features]

@@ -16,6 +16,7 @@ features = ['but','good','place','food','great','very','service','back','really'
             'price','recommend','worth','enough','customer','quality','taste','atmosphere','however',
             'probably','far','disappointed']
 
+
 # Test and training split
 random.seed(1234)
 trainvec = random.sample(range(0,rawdata.shape[0]),round(rawdata.shape[0]*0.7))
@@ -28,7 +29,7 @@ validationdf = rawdata.loc[set(range(0,rawdata.shape[0]))-set(trainvec),]
 model 1 - logistic regression
 '''
 # train model
-logreg = LogisticRegression()
+logreg = LogisticRegression(alpha = 0.01)
 logreg.train(traindf,target,features)
 
 # prediction on train and test data
