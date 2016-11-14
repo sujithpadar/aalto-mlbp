@@ -131,19 +131,18 @@ class LogisticRegression:
 
         return self.weights
 
-
-    def predict(self,ndata,type="raw",classthreshold=0.5):
+    def predict(self, newdata, type="raw", classthreshold=0.5):
         '''
         :param newdata: new data for which the prediction is made
         :param type: return prediction type : raw & class
         :return:
         '''
 
-        newdata = ndata.copy()
+        ndata = newdata.copy()
 
-        newdata['constant'] = 1     # add a constant vector
-        newdata = newdata[self.features]
-        prediction = 1 / (1 + np.exp(-newdata.dot(self.weights)))
+        ndata['constant'] = 1  # add a constant vector
+        ndata = ndata[self.features]
+        prediction = 1 / (1 + np.exp(-ndata.dot(self.weights)))
 
         # check return type
         if type == "class":

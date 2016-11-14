@@ -26,8 +26,21 @@ trainvec = random.sample(range(0,rawdata.shape[0]),round(rawdata.shape[0]*0.7))
 traindf = rawdata.loc[trainvec,]
 validationdf = rawdata.loc[set(range(0,rawdata.shape[0]))-set(trainvec),]
 
-x = traindf[features]
-y = np.concatenate(traindf[target].values)
+
+def train(data, target, features):
+    '''
+    :param data: input pandas dataframe
+    :param target: the target label
+    :param features: python list of explnatory features
+    :return: tree for the features
+    '''
+
+    x = data[features]
+    y = np.concatenate(data[target].values)
+
+    dtree = DecisionTreeTrain(x, y)
+
+    return dtree
 
 
 def DecisionTreeTrain(x,y,maxdepth = 3,depthl=0,depthr=0):
@@ -85,7 +98,7 @@ def buildClassificationSubTree(subx,suby,minnodesize=30):
     for f in fname :
         # check the data type of the feature
         ffeature = tdata[f].values
-        if np.unique(ffeature).size <= 10:
+        if np.unique(ffeature).size <= 1:
             # find split for discrete attributes
             # returns split criteria and split information gain
             ftype.append('discrete')
@@ -116,7 +129,7 @@ def buildClassificationSubTree(subx,suby,minnodesize=30):
         rightnodecrosstab = itemfreq(list(compress(tfeature,rightfeatureindex)))
 
     else:
-        leftnodelabel = list(fbestsplit[np.where(fbestigr == max(fbestigr))[0][0]])
+        leftnodelabel = [(fbestsplit[np.where(fbestigr == max(fbestigr))[0][0]])]
         leftfeatureindex = list(pval <= leftnodelabel[0] for pval in pnodefeature)
         leftnodecrosstab = itemfreq(list(compress(tfeature,leftfeatureindex)))
 
@@ -170,6 +183,11 @@ def igrDiscrete(dfeature,tfeature,priorentropy):
         for ccomb in comb:
             # idenitfy the subset and find the entropy
             classdivf = np.array([avalue in ccomb for avalue in dfeature])* 1
+
+            if (np.sum(classdivf) / classdivf.shape[0]) <= 0.01 or (np.sum(classdivf) / classdivf.shape[0]) >= (
+                1 - 0.01):
+                classdivf = classdivf * 0
+
             # compute igr
             combigr.append(infogainratio(classdivf,tfeature,priorentropy))
 
@@ -200,6 +218,8 @@ def igrNumeric(nfeature,tfeature,priorentropy):
     for ccomb in comb:
         # idenitfy the subset and find the entropy
         classdivf = np.array([avalue <= ccomb for avalue in nfeature])* 1
+        if (np.sum(classdivf) / classdivf.shape[0]) <= 0.01 or (np.sum(classdivf) / classdivf.shape[0]) >= (1 - 0.01):
+            classdivf = classdivf * 0
         # compute igr
         combigr.append(infogainratio(classdivf,tfeature,priorentropy))
     # return combination with highest infogainratio
@@ -227,7 +247,7 @@ def infogainratio(cfeat,tfeat,priorentropy):
     infogain = priorentropy['entropy'] - posteriorentropy
     intrinsicvalue = entropy(cfeat)['entropy']
 
-    return infogain/intrinsicvalue
+    return infogain / (intrinsicvalue + 1e-100)
 
 
 def entropy(efeature):
@@ -245,14 +265,52 @@ def entropy(efeature):
 
 
 
-dtree = DecisionTreeTrain(x,y)
-
 def predict(newdata,type="raw"):
     '''
     :param newdata: data to predict on
     :param type: raw probabilities or class
     :return: predictions
     '''
-    ndata = newdata[features].copy
+
+    ndata = newdata[features].copy()
+    pred = np.zeros(ndata.shape[0])
+    for i in np.arange(0, ndata.shape[0]):
+        nd = ndata.iloc[i, :]
+        encrosstab = getPredictionEndBucket(dtree, nd)
+        if (encrosstab.shape[0] == 1):
+            if encrosstab[0][0] == 0:
+                pred[i] = 0
+            else:
+                pred[i] = 1
+        else:
+            pred[i] = encrosstab[1][1] / np.sum(encrosstab[0][1] + encrosstab[1][1])
+
+    if (type == "class"):
+        poprate = sum(y) / y.shape[0]
+        pred = (pred >= poprate) * 1
+
+    return pred
 
 
+def getPredictionEndBucket(ttree, ndata):
+    if ttree['parent']['dtype'] == 'discrete':
+        if (ndata[ttree['parent']['label']] in ttree['rightnode']['splitc']):
+            branch = 'rightnode'
+        else:
+            branch = 'leftnode'
+
+    else:
+        if (ndata[ttree['parent']['label']] > ttree['rightnode']['splitc']):
+            branch = 'rightnode'
+        else:
+            branch = 'leftnode'
+
+    if ttree[branch]['ctree'] == None:
+        return ttree[branch]['crosstab']
+    else:
+        subtree = ttree[branch]['ctree']
+        return getPredictionEndBucket(subtree, ndata)
+
+
+dtree = train(traindf, target, features)
+pred = predict(validationdf, "class")

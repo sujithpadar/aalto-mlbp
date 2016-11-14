@@ -1,5 +1,4 @@
-
-from mlclassifiers import LogisticRegression,ConfusionMatrix,KfoldCV
+from mlclassifiers import LogisticRegression, ConfusionMatrix, KfoldCV, DecisionTree
 import pandas as pd
 import random
 
@@ -22,8 +21,6 @@ random.seed(1234)
 trainvec = random.sample(range(0,rawdata.shape[0]),round(rawdata.shape[0]*0.7))
 traindf = rawdata.loc[trainvec,]
 validationdf = rawdata.loc[set(range(0,rawdata.shape[0]))-set(trainvec),]
-
-
 
 '''
 model 1 - logistic regression
@@ -61,4 +58,20 @@ ConfusionMatrix(validationdf['rating'],validationdf['pred2'])
 # crossvalidation summary
 KfoldCV(model = logreg,data = rawdata,target = target,features = features, k = 5)
 
+'''
+model 3 - decision trees
+'''
+# train model
+dt = DecisionTree()
+dt.train(traindf, target, features)
 
+# prediction on train and test data
+traindf['pred1'] = dt.predict(newdata=traindf, type="class")
+validationdf['pred1'] = dt.predict(newdata=validationdf, type="class")
+
+# classification summary
+ConfusionMatrix(traindf['rating'], traindf['pred1'])
+ConfusionMatrix(validationdf['rating'], validationdf['pred1'])
+
+# crossvalidation summary
+KfoldCV(model=dt, data=rawdata, target=target, features=features, k=5)
