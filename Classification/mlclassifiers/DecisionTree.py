@@ -39,25 +39,31 @@ class DecisionTree:
 
         stree = self.buildClassificationSubTree(tdata, tfeature)
 
-        # check the stop criteria
-        if (stree['leftnode']['type'] == 'endnode' or depthl >= self.maxdepth):
-            stree['leftnode']['ctree'] = None
+        if stree['parent']['label'] == None:
+            stree = None
 
         else:
-            subdata = tdata.iloc[stree['leftnode']['index']]
-            subtarget = tfeature[np.array(stree['leftnode']['index'])]
-            stree['leftnode']['ctree'] = self.DecisionTreeTrain(subdata, subtarget, depthl + 1, depthr + 1)
+            # check the stop criteria
+            if (stree['leftnode']['type'] == 'endnode' or depthl >= self.maxdepth):
+                stree['leftnode']['ctree'] = None
 
-        if (stree['rightnode']['type'] == 'endnode' or depthr >= self.maxdepth):
-            stree['rightnode']['ctree'] = None
+            else:
 
-        else:
-            subdata = tdata.iloc[stree['rightnode']['index']]
-            subtarget = tfeature[np.array(stree['rightnode']['index'])]
-            stree['rightnode']['ctree'] = self.DecisionTreeTrain(subdata, subtarget, depthl + 1, depthr + 1)
+                subdata = tdata.iloc[stree['leftnode']['index']]
+                subtarget = tfeature[np.array(stree['leftnode']['index'])]
+                stree['leftnode']['ctree'] = self.DecisionTreeTrain(subdata, subtarget, depthl + 1, depthr + 1)
 
-        stree['leftnode']['index'] = None
-        stree['rightnode']['index'] = None
+            if (stree['rightnode']['type'] == 'endnode' or depthr >= self.maxdepth):
+                stree['rightnode']['ctree'] = None
+
+            else:
+
+                subdata = tdata.iloc[stree['rightnode']['index']]
+                subtarget = tfeature[np.array(stree['rightnode']['index'])]
+                stree['rightnode']['ctree'] = self.DecisionTreeTrain(subdata, subtarget, depthl + 1, depthr + 1)
+
+            stree['leftnode']['index'] = None
+            stree['rightnode']['index'] = None
 
         return stree
 
@@ -99,50 +105,65 @@ class DecisionTree:
             fbestigr.append(figr['maxigr'])
             fbestsplit.append(figr['comb'])
 
+
         # choose the best split
         pnodeigr = max(fbestigr)
-        pnodelabel = fname[np.where(fbestigr == pnodeigr)[0][0]]
-        pnodefeature = tdata[pnodelabel].values
-        pnodedtype = ftype[np.where(fbestigr == max(fbestigr))[0][0]]
-
-        # format the split criteria
-        if (pnodedtype == 'discrete'):
-            leftnodelabel = list(fbestsplit[np.where(fbestigr == max(fbestigr))[0][0]])
-            leftfeatureindex = list(pval in leftnodelabel for pval in pnodefeature)
-            leftnodecrosstab = itemfreq(list(compress(tfeature, leftfeatureindex)))
-
-            rightnodelabel = list(set(np.unique(pnodefeature)) - set(leftnodelabel))
-            rightfeatureindex = list(pval in rightnodelabel for pval in pnodefeature)
-            rightnodecrosstab = itemfreq(list(compress(tfeature, rightfeatureindex)))
-
+        if max(fbestigr) == float('-inf'):
+            subtree = {'parent': {'label': None,
+                                  'dtype': None},
+                       'leftnode': {'splitc': None,
+                                    'index': None,
+                                    'crosstab': None,
+                                    'type': 'endnode'},
+                       'rightnode': {'splitc': None,
+                                     'index': None,
+                                     'crosstab': None,
+                                     'type': 'endnode'}}
         else:
-            leftnodelabel = [(fbestsplit[np.where(fbestigr == max(fbestigr))[0][0]])]
-            leftfeatureindex = list(pval <= leftnodelabel[0] for pval in pnodefeature)
-            leftnodecrosstab = itemfreq(list(compress(tfeature, leftfeatureindex)))
+            pnodelabel = fname[np.argmax(fbestigr)]
+            pnodefeature = tdata[pnodelabel].values
+            pnodedtype = ftype[np.argmax(fbestigr)]
 
-            rightnodelabel = leftnodelabel
-            rightfeatureindex = list(pval > leftnodelabel[0] for pval in pnodefeature)
-            rightnodecrosstab = itemfreq(list(compress(tfeature, rightfeatureindex)))
+            # format the split criteria
+            if (pnodedtype == 'discrete'):
 
-        if sum([nclass[1] for nclass in leftnodecrosstab]) <= self.minnodesize or leftnodecrosstab.shape[1] == 1:
-            leftnodetype = "endnode"
-        else:
-            leftnodetype = "intermediatenode"
-        if sum([nclass[1] for nclass in rightnodecrosstab]) <= self.minnodesize or rightnodecrosstab.shape[1] == 1:
-            rightnodetype = "endnode"
-        else:
-            rightnodetype = "intermediatenode"
+                leftnodelabel = list(fbestsplit[np.argmax(fbestigr)])
+                leftfeatureindex = list(pval in leftnodelabel for pval in pnodefeature)
+                leftnodecrosstab = itemfreq(list(compress(tfeature, leftfeatureindex)))
 
-        subtree = {'parent': {'label': pnodelabel,
-                              'dtype': pnodedtype},
-                   'leftnode': {'splitc': leftnodelabel,
-                                'index': leftfeatureindex,
-                                'crosstab': leftnodecrosstab,
-                                'type': leftnodetype},
-                   'rightnode': {'splitc': rightnodelabel,
-                                 'index': rightfeatureindex,
-                                 'crosstab': rightnodecrosstab,
-                                 'type': rightnodetype}}
+                rightnodelabel = list(set(np.unique(pnodefeature)) - set(leftnodelabel))
+                rightfeatureindex = list(pval in rightnodelabel for pval in pnodefeature)
+                rightnodecrosstab = itemfreq(list(compress(tfeature, rightfeatureindex)))
+
+            else:
+                leftnodelabel = [(fbestsplit[np.argmax(fbestigr)])]
+                leftfeatureindex = list(pval <= leftnodelabel[0] for pval in pnodefeature)
+                leftnodecrosstab = itemfreq(list(compress(tfeature, leftfeatureindex)))
+
+                rightnodelabel = leftnodelabel
+                rightfeatureindex = list(pval > leftnodelabel[0] for pval in pnodefeature)
+                rightnodecrosstab = itemfreq(list(compress(tfeature, rightfeatureindex)))
+
+            if sum([nclass[1] for nclass in leftnodecrosstab]) <= self.minnodesize or leftnodecrosstab.shape[1] == 1:
+                leftnodetype = "endnode"
+            else:
+                leftnodetype = "intermediatenode"
+            if sum([nclass[1] for nclass in rightnodecrosstab]) <= self.minnodesize or rightnodecrosstab.shape[1] == 1:
+                rightnodetype = "endnode"
+            else:
+                rightnodetype = "intermediatenode"
+
+            subtree = {'parent': {'label': pnodelabel,
+                                  'dtype': pnodedtype},
+                       'leftnode': {'splitc': leftnodelabel,
+                                    'index': leftfeatureindex,
+                                    'crosstab': leftnodecrosstab,
+                                    'type': leftnodetype},
+                       'rightnode': {'splitc': rightnodelabel,
+                                     'index': rightfeatureindex,
+                                     'crosstab': rightnodecrosstab,
+                                     'type': rightnodetype}}
+
         return subtree
 
     def igrDiscrete(self, dfeature, tfeature, priorentropy):
