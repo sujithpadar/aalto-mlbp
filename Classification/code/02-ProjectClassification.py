@@ -23,7 +23,7 @@ orgfeatures = ['but', 'good', 'place', 'food', 'great', 'very', 'service', 'back
                'price', 'recommend', 'worth', 'enough', 'customer', 'quality', 'taste', 'atmosphere', 'however',
                'probably', 'far', 'disappointed']
 
-features = list(set(rawdata.columns.values) - set(['ID', 'rating']))
+allfeatures = list(set(rawdata.columns.values) - set(['ID', 'rating']))
 
 '''
 train and validation split
@@ -39,11 +39,13 @@ model 1 - logistic regression with L1 regularization
 '''
 from sklearn import linear_model
 
-formula = ModelDesc([Term([LookupFactor('rating')])], [Term([LookupFactor(c)]) for c in features])
+formula = ModelDesc([Term([LookupFactor('rating')])], [Term([LookupFactor(c)]) for c in allfeatures])
 
 y, x = dmatrices(formula, traindf, return_type="dataframe")
+y = y.values.flatten()
 
 logreg = linear_model.LogisticRegression(C=0.1, penalty='l1', tol=0.01)
+logreg = linear_model.LogisticRegressionCV(penalty='l1', solver='liblinear')
 
 # train model
 logreg.fit(x, y)
@@ -59,11 +61,16 @@ validationdf['pred_LRL1'] = logreg.predict(validationdf[features])
 ConfusionMatrix(traindf['rating'], traindf['pred_LRL1'])
 ConfusionMatrix(validationdf['rating'], validationdf['pred_LRL1'])
 
+scores = cross_val_score(logreg, x, y, cv=5)
+print("Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+
+
 '''
 L2 regularisation on new features
 '''
 formula = ModelDesc([Term([LookupFactor('rating')])], [Term([LookupFactor(c)]) for c in nflist])
 y, x = dmatrices(formula, traindf, return_type="dataframe")
+y = y.values.flatten()
 
 logreg = linear_model.LogisticRegressionCV(penalty='l2')
 
@@ -81,6 +88,37 @@ testdf['pred_LRL2'] = logreg.predict(testdf[nflist])
 ConfusionMatrix(traindf['rating'], traindf['pred_LRL2'])
 ConfusionMatrix(validationdf['rating'], validationdf['pred_LRL2'])
 ConfusionMatrix(testdf['rating'], testdf['pred_LRL2'])
+
+scores = cross_val_score(logreg, x, y, cv=5)
+print("Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+
+'''
+L2 regularisation on origirnal features
+'''
+formula = ModelDesc([Term([LookupFactor('rating')])], [Term([LookupFactor(c)]) for c in orgfeatures])
+y, x = dmatrices(formula, traindf, return_type="dataframe")
+y = y.values.flatten()
+
+logreg = linear_model.LogisticRegressionCV(penalty='l2')
+
+# train model
+logreg.fit(x, y)
+coeffdf = pd.DataFrame({'feature': x.columns, 'coeff': np.transpose(logreg.coef_).flatten()})
+print(logreg.C_)
+
+# prediction on train and test data
+traindf['pred_LRL2'] = logreg.predict(traindf[nflist])
+validationdf['pred_LRL2'] = logreg.predict(validationdf[nflist])
+testdf['pred_LRL2'] = logreg.predict(testdf[nflist])
+
+# classification summary
+ConfusionMatrix(traindf['rating'], traindf['pred_LRL2'])
+ConfusionMatrix(validationdf['rating'], validationdf['pred_LRL2'])
+ConfusionMatrix(testdf['rating'], testdf['pred_LRL2'])
+
+scores = cross_val_score(logreg, x, y, cv=5)
+print("Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+
 
 '''
 L2 regularisation normal
@@ -163,6 +201,9 @@ logreg = linear_model.LogisticRegressionCV(penalty='l1', solver='liblinear')
 logreg.fit(x, y)
 coeffdf = pd.DataFrame({'feature': x.columns, 'coeff': np.transpose(logreg.coef_).flatten()})
 nflist = coeffdf[coeffdf.coeff != 0].feature.values.tolist()
+print(len(nflist))
+
+
 avg_score = np.mean(
     np.array([cvscore[np.where(np.array(logreg.Cs_) == np.array(logreg.C_))[0][0]] for cvscore in logreg.scores_[1.0]]))
 
