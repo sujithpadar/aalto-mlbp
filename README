@@ -1,1 +1,4 @@
-Just Demo
+This is the submoission for yelp-review-challenge created as part of MLBP course in Aalto.
+The task was to build a classifier and a regressor to predict the rating of the review(classification)and usefullness
+of review(number of likes/regression).
+With an unique technique using L2 and L1 regularization an MSE of 0 is achieved for regression task.
