@@ -6,7 +6,7 @@ from patsy import dmatrices, ModelDesc, Term, LookupFactor
 from sklearn.metrics import roc_curve
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_auc_score
-from sklearn.model_selection import cross_val_score
+#from sklearn.model_selection import cross_val_score
 
 '''
 Import data and declare features

@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 '''
 Import data and declare features
 '''
-rawdata = pd.read_csv("/media/Documents/01 Aalto/03 Study/Semester 01/02 Machine Learning Basic Principles - Alex Jung/Term Project/Classification/data/classification_dataset_training.csv")
+rawdata = pd.read_csv(r'C:\Users\MY\Documents\Courses\MLBP\Term Project\aalto-mlbp\Classification\data\classification_dataset_training.csv')
 target = ['rating']
 features = ['but','good','place','food','great','very','service','back','really','nice',
             'love','little','ordered','first','much','came','went','try','staff','people',
